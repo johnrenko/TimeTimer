@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.3.0/math.min.js"></script>
+  <style type="text/css">
+    body{
+    	margin:0;
+    	padding:0;
+    }
+
+    #canvas_wrapper{
+      width:800px;
+      margin:0 auto;
+    }
+    </style>
+</head>
+
+<body>
+  <form id="idForm">
+    Set time=<input type="text" id="idCountTime" value="10">[minutes]
+    <input type="button" value="Start countdown" onclick="startCountDown()"><br>
+  </form>
+  <div id="canvas_wrapper">
+    <canvas id="cv" width="800" height="800"></canvas>
+  </div>
+
+  <script>
+
+    var maxTime = 120;
+
+    var startDate;
+    var centerOffsetX = 400;
+    var centerOffsetY = 400;
+
+    var timer;
+    var countTime;
+    var startDate;
+    var currentDate;
+    var elapsedTime;
+    var remainingTime;
+    var radius = 300;
+    var dialTextRadiusMargin = 20;
+    var ticksLength = 50;
+    var subTicksLength = 10;
+    var progressChartCenterRadius = 80;
+
+    // Loading audio files
+    var audioStart = new Audio();
+    audioStart.src = "Start.wav";
+
+    var audioTimeUp = new Audio();
+    audioTimeUp.src = "TimeUp.wav";
+
+    // Initializing variables for drawing
+    var canvas = document.getElementById("cv");
+    var ctx = document.getElementById("cv").getContext("2d");
+
+    // Initialize drawing
+    drawForeground();
+
+
+    function coordinateX( x ) { return (centerOffsetX+x); }
+    function coordinateY( y ) { return (centerOffsetY-y); }
+
+    function startCountDown()
+    {
+      // Get input time
+      countTime = document.forms.idForm.idCountTime.value * 60;
+      if( countTime < 0 || countTime > maxTime*60 )
+      {
+        countTime = 0;
+        alert("Input time should be 0[min] to 120[min]");
+      }
+      remainingTime = countTime;
+      startDate = new Date();
+      audioStart.play();
+      clearInterval(timer);
+      timer = setInterval("countDown()",100);
+      reDraw();
+    }
+
+    function stopCountDown()
+    {
+      clearInterval(timer);
+    }
+
+    function countDown()
+    {
+      currentDate = new Date();
+      elapsedTime = currentDate.getTime() - startDate.getTime();
+      remainingTime = countTime - Math.floor(elapsedTime/1000);
+      if( remainingTime <= 0 )
+      {
+        clearInterval(timer);
+        remainingTime = 0;
+        audioTimeUp.play();
+      }
+      reDraw();
+    }
+
+    function reDraw()
+    {
+      ctx.beginPath();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBackground();
+      drawForeground();
+      ctx.fillStyle = 'rgb(0,0,0)';
+      ctx.fillText("Rem. "+remainingTime+" [sec]", coordinateX(0), coordinateY(0));
+      ctx.stroke();
+    }
+
+    function drawForeground()
+    {
+      ctx.beginPath();
+      ctx.arc( coordinateX(0), coordinateY(0), radius, 0, Math.PI*2, true);
+      ctx.stroke();
+      ctx.closePath();
+      ctx.font = "40px 'Bernard MT Condensed'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "black";
+      ctx.beginPath();
+      for( var i=0; i<maxTime; i++ )
+      {
+        if( i%5==0 )
+        {
+          ctx.fillText(i,  coordinateX((radius+dialTextRadiusMargin)*Math.cos(2*Math.PI/maxTime*i+Math.PI/2)), coordinateY((radius+dialTextRadiusMargin)*Math.sin(2*Math.PI/maxTime*i+Math.PI/2)));
+          ctx.moveTo(coordinateX((radius)*Math.cos(2*Math.PI/maxTime*i+Math.PI/2)), coordinateY((radius)*Math.sin(2*Math.PI/maxTime*i+Math.PI/2)));
+          ctx.lineTo(coordinateX((radius-ticksLength)*Math.cos(2*Math.PI/maxTime*i+Math.PI/2)), coordinateY((radius-ticksLength)*Math.sin(2*Math.PI/maxTime*i+Math.PI/2)));
+        }
+        else
+        {
+          ctx.moveTo(coordinateX((radius)*Math.cos(2*Math.PI/maxTime*i+Math.PI/2)), coordinateY((radius)*Math.sin(2*Math.PI/maxTime*i+Math.PI/2)));
+          ctx.lineTo(coordinateX((radius-subTicksLength)*Math.cos(2*Math.PI/maxTime*i+Math.PI/2)), coordinateY((radius-subTicksLength)*Math.sin(2*Math.PI/maxTime*i+Math.PI/2)));
+        }
+        ctx.stroke();
+      }
+      for( var i=0; i<(maxTime/5); i++ )
+      {
+        ctx.fillText(5*i,  coordinateX((radius+dialTextRadiusMargin)*Math.cos(2*Math.PI/(maxTime/5)*i+Math.PI/2)), coordinateY((radius+dialTextRadiusMargin)*Math.sin(2*Math.PI/(maxTime/5)*i+Math.PI/2)));
+        ctx.moveTo(coordinateX((radius)*Math.cos(2*Math.PI/(maxTime/5)*i+Math.PI/2)), coordinateY((radius)*Math.sin(2*Math.PI/(maxTime/5)*i+Math.PI/2)));
+        ctx.lineTo(coordinateX((radius-ticksLength)*Math.cos(2*Math.PI/(maxTime/5)*i+Math.PI/2)), coordinateY((radius-ticksLength)*Math.sin(2*Math.PI/(maxTime/5)*i+Math.PI/2)));
+        ctx.stroke();
+      }
+      ctx.closePath();
+    }
+
+    function drawBackground()
+    {
+      ctx.beginPath();
+      ctx.fillStyle = 'rgb(255,0,0)';
+      ctx.lineTo( coordinateX(0), coordinateY(radius) );
+      ctx.arc( coordinateX(0), coordinateY(0), radius, -Math.PI/2, -Math.PI/2-Math.PI*2*(remainingTime/(maxTime*60)), true);
+      ctx.lineTo( coordinateX(0), coordinateY(0) );
+      ctx.stroke();
+      ctx.fill();
+      ctx.closePath();
+      ctx.beginPath();
+      ctx.fillStyle = 'rgb(255,255,255)';
+      ctx.arc( coordinateX(0), coordinateY(0), progressChartCenterRadius, 0, Math.PI*2, true);
+      ctx.fill();
+      ctx.closePath();
+    }
+
+
+  </script>
+</body>
+</html>
