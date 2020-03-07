@@ -4,7 +4,22 @@ TimeTimer software written by javascript with a little original specifications.
 
 ## Usage
 
-(Fill in later)
+1. Open **index.html**.
+
+1. Set time in minutes at upper left.
+ex. Set time to 10[min].
+
+| ![Set time](https://user-images.githubusercontent.com/61282134/76152938-abe89300-6108-11ea-9d72-e5d488db2e76.png) |
+|:---:|
+
+3. Click **Start countdown** button.
+Then start countdown.
+ex. Remaining 289[sec].
+
+| ![Remaining 289[sec]](https://user-images.githubusercontent.com/61282134/76152872-09301480-6108-11ea-9e1e-8f64ea9a53e7.png) |
+|:---:|
+
+4. Alert sound sounds When remaining time reaches 0 seconds.
 
 ## Specifications
 
